@@ -11,22 +11,22 @@ import {
   Menu
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 
 interface NavItem {
   icon: React.ElementType;
   label: string;
-  active?: boolean;
+  path: string;
   badge?: number;
 }
 
 const navItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", active: true },
-  { icon: Users, label: "Patients", badge: 5 },
-  { icon: Calendar, label: "Appointments" },
-  { icon: BarChart3, label: "Analytics" },
-  { icon: Bell, label: "Notifications", badge: 3 },
-  { icon: Settings, label: "Settings" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: Users, label: "Patients", path: "/patients", badge: 5 },
+  { icon: Calendar, label: "Appointments", path: "/appointments" },
+  { icon: BarChart3, label: "Analytics", path: "/analytics" },
+  { icon: Bell, label: "Notifications", path: "/notifications", badge: 3 },
+  { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 interface DashboardSidebarProps {
@@ -35,11 +35,13 @@ interface DashboardSidebarProps {
 }
 
 export function DashboardSidebar({ collapsed = false, onToggle }: DashboardSidebarProps) {
+  const location = useLocation();
+
   return (
     <motion.aside
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className={`bg-sidebar text-sidebar-foreground h-screen flex flex-col transition-all duration-300 ${
+      className={`bg-sidebar text-sidebar-foreground h-screen flex flex-col transition-all duration-300 sticky top-0 ${
         collapsed ? 'w-20' : 'w-64'
       }`}
     >
@@ -71,31 +73,38 @@ export function DashboardSidebar({ collapsed = false, onToggle }: DashboardSideb
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item, index) => (
-          <motion.button
-            key={item.label}
-            initial={{ x: -20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: index * 0.05 }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              item.active 
-                ? 'bg-sidebar-accent text-sidebar-primary' 
-                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
-            }`}
-          >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
-            {!collapsed && (
-              <>
-                <span className="flex-1 text-left text-sm font-medium">{item.label}</span>
-                {item.badge && (
-                  <span className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
-                    {item.badge}
-                  </span>
+        {navItems.map((item, index) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <motion.div
+              key={item.label}
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <NavLink
+                to={item.path}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  isActive 
+                    ? 'bg-sidebar-accent text-sidebar-primary' 
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                }`}
+              >
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 text-left text-sm font-medium">{item.label}</span>
+                    {item.badge && (
+                      <span className="bg-sidebar-primary text-sidebar-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
+                        {item.badge}
+                      </span>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </motion.button>
-        ))}
+              </NavLink>
+            </motion.div>
+          );
+        })}
       </nav>
 
       {/* Doctor Profile */}
